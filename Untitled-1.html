@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeafKIT | Общение без границ</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (Inter and Space Grotesk) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Custom Config & Styles -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0f172a',
+                            primary: '#3b82f6',
+                            accent: '#14b8a6', // Teal
+                            purple: '#8b5cf6'
+                        }
+                    },
+                    animation: {
+                        'wave': 'wave 1.2s ease-in-out infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'spin-slow': 'spin 12s linear infinite',
+                    },
+                    keyframes: {
+                        wave: {
+                            '0%, 100%': { height: '10%' },
+                            '50%': { height: '100%' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Audio Wave Animation Bars */
+        .bar {
+            width: 6px;
+            background: linear-gradient(to top, #14b8a6, #3b82f6);
+            border-radius: 9999px;
+            animation: wave 1s ease-in-out infinite;
+        }
+        .bar:nth-child(odd) { animation-duration: 0.8s; }
+        .bar:nth-child(2n) { animation-duration: 1.1s; }
+        .bar:nth-child(3n) { animation-duration: 1.3s; }
+        .bar:nth-child(4n) { animation-duration: 0.9s; }
+
+        /* Custom Styles for Problem/Solution Section */
+        .problem-card {
+            border: 1px solid #dc262620; /* Red 600 / 20 */
+            background: linear-gradient(145deg, rgba(220,38,38,0.05) 0%, rgba(107,33,33,0.01) 100%);
+            transition: all 0.3s ease;
+        }
+        .solution-card {
+            border: 1px solid #14b8a620; /* Teal 500 / 20 */
+            background: linear-gradient(145deg, rgba(20,184,166,0.05) 0%, rgba(6,78,59,0.01) 100%);
+            box-shadow: 0 0 40px rgba(20, 184, 166, 0.1);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-brand-dark text-slate-100 font-sans overflow-x-hidden selection:bg-brand-accent selection:text-brand-dark">
+
+    <!-- Background Gradients -->
+    <div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-brand-primary/20 rounded-full blur-[128px]"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-brand-accent/10 rounded-full blur-[128px]"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass border-b border-white/5 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center gap-2">
+                    <i class="ph-fill ph-hands-clapping text-3xl text-brand-accent"></i>
+                    <span class="font-display font-bold text-2xl tracking-tight text-white">Deaf<span class="text-brand-accent">KIT</span></span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <!-- Links updated to use the side path functionality via JS -->
+                        <a href="#problem" class="nav-link hover:text-brand-accent transition-colors px-3 py-2 text-sm font-medium">Миссия</a>
+                        <a href="#implementation" class="nav-link hover:text-brand-accent transition-colors px-3 py-2 text-sm font-medium">Технологии</a>
+                        <a href="#team" class="nav-link hover:text-brand-accent transition-colors px-3 py-2 text-sm font-medium">Команда</a>
+                        <a href="#roadmap" class="nav-link hover:text-brand-accent transition-colors px-3 py-2 text-sm font-medium">План</a>
+                        <a href="https://frabjous-zuccutto-cb8995.netlify.app/demo/" class="bg-brand-accent text-brand-dark hover:bg-teal-400 px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-[0_0_15px_rgba(20,184,166,0.3)]">Демо</a>
+                    </div>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-gray-300 hover:text-white p-2">
+                        <i class="ph ph-list text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="hidden md:hidden glass border-t border-white/10 absolute w-full">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#problem" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-white/5 nav-link-mobile">Миссия</a>
+                <a href="#implementation" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-white/5 nav-link-mobile">Технологии</a>
+                <a href="#team" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-white/5 nav-link-mobile">Команда</a>
+                <a href="#roadmap" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-white/5 nav-link-mobile">План</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- MAIN CONTENT CONTAINER -->
+    <div>
+        <!-- Hero Section (Not part of scroll snapping, serves as Section 0) -->
+        <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden" id="hero">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div data-aos="fade-right" data-aos-duration="1000">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-brand-accent text-sm font-medium mb-6">
+                            <span class="relative flex h-2 w-2">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+                            </span>
+                            Hackathon AI500
+                        </div>
+                        <h1 class="text-5xl lg:text-7xl font-display font-bold leading-tight mb-6">
+                            Преодолевая <br>
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-brand-primary">Барьер Тишины</span>
+                        </h1>
+                        <p class="text-lg text-slate-400 mb-8 max-w-xl leading-relaxed">
+                            DeafKIT помогает людям с нарушениями слуха общаться с помощью ИИ-перевода жестового языка и речи в текст в реальном времени. Общение без границ.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <a href="#implementation" class="scroll-to-section group px-8 py-4 bg-gradient-to-r from-brand-accent to-blue-500 rounded-full font-bold text-brand-dark flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(20,184,166,0.5)] transition-all">
+                                Как это работает
+                                <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Abstract Visualization -->
+                    <div class="relative" data-aos="zoom-in" data-aos-duration="1200">
+                        <!-- Central Card -->
+                        <div class="relative z-10 glass-card rounded-2xl p-8 max-w-md mx-auto animate-float">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-gray-700 overflow-hidden">
+                                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=64&h=64" alt="User" class="w-full h-full object-cover">
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-bold text-white">Мария</div>
+                                        <div class="text-xs text-brand-accent">Перевод...</div>
+                                    </div>
+                                </div>
+                                <i class="ph-fill ph-wave-sine text-2xl text-brand-accent"></i>
+                            </div>
+                            
+                            <!-- Visualizing Speech -->
+                            <div class="h-24 flex items-center justify-center gap-1 mb-6">
+                                <div class="bar h-8"></div>
+                                <div class="bar h-12"></div>
+                                <div class="bar h-6"></div>
+                                <div class="bar h-16"></div>
+                                <div class="bar h-10"></div>
+                                <div class="bar h-20"></div>
+                                <div class="bar h-14"></div>
+                                <div class="bar h-8"></div>
+                                <div class="bar h-12"></div>
+                                <div class="bar h-5"></div>
+                            </div>
+
+                            <!-- Translation Output -->
+                            <div class="bg-brand-dark/50 rounded-lg p-4 border border-white/5">
+                                <p class="text-gray-400 text-xs uppercase tracking-wider mb-2">Распознанные жесты</p>
+                                <p class="text-lg font-medium text-white typing-effect">"Привет, приятно познакомиться."</p>
+                            </div>
+                        </div>
+
+                        <!-- Decorative Background Elements -->
+                        <div class="absolute -top-10 -right-10 w-24 h-24 bg-purple-500/20 rounded-full blur-xl animate-pulse"></div>
+                        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-teal-500/20 rounded-full blur-xl animate-pulse" style="animation-delay: 1s;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Problem & Solution (Section 1: Миссия) -->
+        <section id="problem" class="section-scroll py-20 relative">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-sm font-bold text-brand-primary tracking-widest uppercase mb-2">НАША МИССИЯ</h2>
+                    <h3 class="text-3xl md:text-4xl font-display font-bold">Проблема и Решение</h3>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8 lg:gap-12">
+                    <!-- Problem Card (Isolation) -->
+                    <div class="problem-card rounded-3xl p-8 lg:p-12 relative overflow-hidden group hover:shadow-2xl hover:shadow-red-500/10 transition-shadow" data-aos="fade-right" data-aos-duration="800">
+                        <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <i class="ph-fill ph-prohibit text-9xl text-red-700"></i>
+                        </div>
+                        <div class="relative z-10">
+                            <div class="w-12 h-12 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center text-2xl mb-6">
+                                <i class="ph-bold ph-warning"></i>
+                            </div>
+                            <h2 class="text-3xl font-display font-bold mb-4 text-red-300">Глобальный Барьер Общения</h2>
+                            <p class="text-slate-400 leading-relaxed mb-6">
+                                Более **466 миллионов** человек в мире сталкиваются с проблемами слуха. Взаимодействие в общественной жизни, образовании и на рабочем месте затруднено из-за отсутствия мгновенного и надежного двустороннего перевода. Это приводит к социальной изоляции и ограничению возможностей.
+                            </p>
+                            <h4 class="font-semibold text-lg mb-3 text-white">Ключевые вызовы:</h4>
+                            <ul class="space-y-3 text-slate-300">
+                                <li class="flex items-start gap-3">
+                                    <i class="ph-fill ph-x-circle text-red-400 mt-1 flex-shrink-0"></i> 
+                                    <p>Трудности в **критических ситуациях** (медицина, полиция), где скорость и точность понимания жизненно важны.</p>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="ph-fill ph-x-circle text-red-400 mt-1 flex-shrink-0"></i> 
+                                    <p>Ограниченное участие в **образовательных и бизнес-процессах** без дорогостоящих переводчиков.</p>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="ph-fill ph-x-circle text-red-400 mt-1 flex-shrink-0"></i> 
+                                    <p>Социальная изоляция и сложности в получении **повседневных бытовых услуг**.</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Solution Card (DeafKIT) -->
+                    <div class="solution-card rounded-3xl p-8 lg:p-12 relative overflow-hidden group hover:shadow-2xl hover:shadow-brand-accent/20 transition-shadow" data-aos="fade-left" data-aos-duration="800">
+                        <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <i class="ph-fill ph-check-circle text-9xl text-brand-accent"></i>
+                        </div>
+                        <div class="relative z-10">
+                            <div class="w-12 h-12 rounded-xl bg-brand-accent/20 text-brand-accent flex items-center justify-center text-2xl mb-6">
+                                <i class="ph-bold ph-lightbulb"></i>
+                            </div>
+                            <h2 class="text-3xl font-display font-bold mb-4 text-brand-accent">Мост Инклюзивности на Базе ИИ</h2>
+                            <p class="text-slate-400 leading-relaxed mb-6">
+                                **DeafKIT** — это универсальный двусторонний AI-интерпретатор, устраняющий разрыв в коммуникации. Мы используем продвинутый искусственный интеллект для двух ключевых направлений.
+                            </p>
+                            <h4 class="font-semibold text-lg mb-3 text-white">Технологическое преимущество:</h4>
+                            <ul class="space-y-3 text-white">
+                                <li class="flex items-start gap-3">
+                                    <i class="ph-fill ph-check-circle text-brand-accent mt-1 flex-shrink-0"></i> 
+                                    <p>Мгновенный **двусторонний перевод** (Жесты ↔ Речь), работающий в реальном времени.</p>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="ph-fill ph-check-circle text-brand-accent mt-1 flex-shrink-0"></i> 
+                                    <p>**Computer Vision** (MediaPipe, LSTM) для точного распознавания 3D-положения рук и жестов.</p>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="ph-fill ph-check-circle text-brand-accent mt-1 flex-shrink-0"></i> 
+                                    <p>Оптимизированные модели для **мобильных устройств** и возможности автономной работы.</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Implementation / Tech Stack (Section 2: Технологии) -->
+        <section id="implementation" class="section-scroll py-20 bg-black/20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-sm font-bold text-brand-accent tracking-widest uppercase mb-2">Под капотом</h2>
+                    <h3 class="text-3xl md:text-4xl font-display font-bold">Как работает DeafKIT</h3>
+                </div>
+
+                <!-- Tech Diagram -->
+                <div class="relative max-w-5xl mx-auto">
+                    <!-- Mobile Flow (Vertical) / Desktop (Horizontal) -->
+                    <div class="flex flex-col md:flex-row items-stretch justify-center gap-4 md:gap-0">
+                        
+                        <!-- Step 1 -->
+                        <div class="flex-1 p-6 glass-card rounded-xl text-center relative group hover:-translate-y-2 transition-transform duration-300" data-aos="fade-up" data-aos-delay="0">
+                            <div class="w-14 h-14 mx-auto bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 text-2xl mb-4">
+                                <i class="ph-fill ph-webcam"></i>
+                            </div>
+                            <h4 class="font-bold text-lg mb-2">Входные данные</h4>
+                            <p class="text-sm text-slate-400">Видеопоток с камеры фиксирует жесты или микрофон захватывает аудио.</p>
+                            <!-- Connector Arrow -->
+                            <div class="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gray-600 z-0"></div>
+                            <div class="md:hidden absolute bottom-[-1rem] left-1/2 h-4 w-0.5 bg-gray-600"></div>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="flex-1 p-6 glass-card rounded-xl text-center relative border-brand-accent/50 shadow-[0_0_20px_rgba(20,184,166,0.1)] z-10" data-aos="fade-up" data-aos-delay="100">
+                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-accent text-brand-dark text-xs font-bold px-3 py-1 rounded-full">CORE AI</div>
+                            <div class="w-14 h-14 mx-auto bg-brand-accent/20 rounded-full flex items-center justify-center text-brand-accent text-2xl mb-4">
+                                <i class="ph-fill ph-brain"></i>
+                            </div>
+                            <h4 class="font-bold text-lg mb-2">Обработка</h4>
+                            <p class="text-sm text-slate-400 mb-2">MediaPipe (Трекинг рук) + TensorFlow (LSTM Модель)</p>
+                            <div class="flex flex-wrap justify-center gap-2 mt-3">
+                                <span class="text-xs bg-white/10 px-2 py-1 rounded">Python</span>
+                                <span class="text-xs bg-white/10 px-2 py-1 rounded">OpenCV</span>
+                            </div>
+                            <!-- Connector Arrow -->
+                            <div class="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gray-600"></div>
+                            <div class="md:hidden absolute bottom-[-1rem] left-1/2 h-4 w-0.5 bg-gray-600"></div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="flex-1 p-6 glass-card rounded-xl text-center relative group hover:-translate-y-2 transition-transform duration-300" data-aos="fade-up" data-aos-delay="200">
+                            <div class="w-14 h-14 mx-auto bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400 text-2xl mb-4">
+                                <i class="ph-fill ph-translate"></i>
+                            </div>
+                            <h4 class="font-bold text-lg mb-2">Результат</h4>
+                            <p class="text-sm text-slate-400">Синтез речи (TTS) или рендеринг 3D-аватара.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Team Section (Section 3: Команда) -->
+        <section id="team" class="section-scroll py-20 relative overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-4xl font-display font-bold mb-4">Почему мы?</h2>
+                    <p class="text-slate-400 max-w-2xl mx-auto">
+                        Мы не просто разработчики — мы сторонники доступности и инклюзивных технологий. С более чем **3-летним** опытом в области Computer Vision и Deep Learning, мы обладаем необходимыми техническими компетенциями для реализации этой идеи на высоком уровне.
+                    </p>
+                </div>
+
+                <!-- Team Grid: Flexbox for responsive centering (5 items) -->
+                <div class="flex flex-wrap justify-center gap-8">
+                    
+                    <!-- Member 1: Doniyor - Accent/Teal -->
+                    <div class="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-2rem)] glass-card p-6 rounded-2xl text-center hover:bg-white/5 transition-all group hover:-translate-y-2" data-aos="fade-up" data-aos-delay="0">
+                        <div class="w-24 h-24 mx-auto rounded-full overflow-hidden mb-4 border-2 border-brand-accent/50 p-1 bg-gray-700">
+                            <!-- ИЗМЕНЕН ПУТЬ НА ЛОКАЛЬНЫЙ: ./img/doniyor.jpg -->
+                            <img 
+                                src="./img/doniyor.jpg" 
+                                alt="Акрамов Дониер" 
+                                class="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all"
+                                onerror="this.onerror=null; this.src='https://placehold.co/100x100/10b981/ffffff?text=D'"
+                            >
+                        </div>
+                        <h4 class="font-bold text-lg text-white">Акрамов Дониер</h4>
+                        <p class="text-brand-accent text-sm font-bold mb-2">Team Lead / ML Engineer</p>
+                        <div class="text-xs text-slate-400 space-y-1">
+                            <p>AI Architecture</p>
+                            <p>Speech-to-Text</p>
+                        </div>
+                    </div>
+
+                    <!-- Member 2: Oybek - Blue -->
+                    <div class="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-2rem)] glass-card p-6 rounded-2xl text-center hover:bg-white/5 transition-all group hover:-translate-y-2" data-aos="fade-up" data-aos-delay="100">
+                        <div class="w-24 h-24 mx-auto rounded-full overflow-hidden mb-4 border-2 border-blue-500/50 p-1 bg-gray-700">
+                            <!-- ИЗМЕНЕН ПУТЬ НА ЛОКАЛЬНЫЙ: ./img/oybek.jpg -->
+                            <img 
+                                src="./img/oybek.jpg" 
+                                alt="Махмудов Ойбек" 
+                                class="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all"
+                                onerror="this.onerror=null; this.src='https://placehold.co/100x100/3b82f6/ffffff?text=O'"
+                            >
+                        </div>
+                        <h4 class="font-bold text-lg text-white">Махмудов Ойбек</h4>
+                        <p class="text-blue-400 text-sm font-bold mb-2">Backend Developer</p>
+                        <div class="text-xs text-slate-400 space-y-1">
+                            <p>API • Realtime Audio</p>
+                            <p>Databases</p>
+                        </div>
+                    </div>
+
+                    <!-- Member 3: Artur - Purple -->
+                    <div class="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-2rem)] glass-card p-6 rounded-2xl text-center hover:bg-white/5 transition-all group hover:-translate-y-2" data-aos="fade-up" data-aos-delay="200">
+                        <div class="w-24 h-24 mx-auto rounded-full overflow-hidden mb-4 border-2 border-purple-500/50 p-1 bg-gray-700">
+                            <!-- ИЗМЕНЕН ПУТЬ НА ЛОКАЛЬНЫЙ: ./img/artur.jpg -->
+                            <img 
+                                src="./img/artur.jpg" 
+                                alt="Усманов Артур" 
+                                class="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all"
+                                onerror="this.onerror=null; this.src='https://placehold.co/100x100/8b5cf6/ffffff?text=A'"
+                            >
+                        </div>
+                        <h4 class="font-bold text-lg text-white">Усманов Артур</h4>
+                        <p class="text-purple-400 text-sm font-bold mb-2">Frontend Developer</p>
+                        <div class="text-xs text-slate-400 space-y-1">
+                            <p>React • UI/UX</p>
+                            <p>Animations</p>
+                        </div>
+                    </div>
+
+                    <!-- Member 4: Nazirbek - Indigo -->
+                    <div class="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-2rem)] glass-card p-6 rounded-2xl text-center hover:bg-white/5 transition-all group hover:-translate-y-2" data-aos="fade-up" data-aos-delay="300">
+                        <div class="w-24 h-24 mx-auto rounded-full overflow-hidden mb-4 border-2 border-indigo-500/50 p-1 bg-gray-700">
+                            <!-- ИЗМЕНЕН ПУТЬ НА ЛОКАЛЬНЫЙ: ./img/nazirbek.jpg -->
+                            <img 
+                                src="./img/nazirbek.jpg" 
+                                alt="Абдусаматов Назирбек" 
+                                class="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all"
+                                onerror="this.onerror=null; this.src='https://placehold.co/100x100/6366f1/ffffff?text=N'"
+                            >
+                        </div>
+                        <h4 class="font-bold text-lg text-white">Абдусаматов Назирбек</h4>
+                        <p class="text-indigo-400 text-sm font-bold mb-2">Computer Vision Engineer</p>
+                        <div class="text-xs text-slate-400 space-y-1">
+                            <p>Gesture Recognition</p>
+                            <p>CV Models</p>
+                        </div>
+                    </div>
+
+                    <!-- Member 5: Samandar - Orange -->
+                    <div class="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-2rem)] glass-card p-6 rounded-2xl text-center hover:bg-white/5 transition-all group hover:-translate-y-2" data-aos="fade-up" data-aos-delay="400">
+                        <div class="w-24 h-24 mx-auto rounded-full overflow-hidden mb-4 border-2 border-orange-500/50 p-1 bg-gray-700">
+                            <!-- ИЗМЕНЕН ПУТЬ НА ЛОКАЛЬНЫЙ: ./img/samandar.jpg -->
+                            <img 
+                                src="./img/samandar.jpg" 
+                                alt="Мухторов Самандар" 
+                                class="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all"
+                                onerror="this.onerror=null; this.src='https://placehold.co/100x100/f97316/ffffff?text=S'"
+                            >
+                        </div>
+                        <h4 class="font-bold text-lg text-white">Мухторов Самандар</h4>
+                        <p class="text-orange-400 text-sm font-bold mb-2">DevOps / QA Engineer</p>
+                        <div class="text-xs text-slate-400 space-y-1">
+                            <p>CI/CD • Deploy</p>
+                            <p>Testing</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Roadmap (Section 4: План) -->
+        <section id="roadmap" class="section-scroll py-20 bg-black/20">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-3xl md:text-4xl font-display font-bold">Дорожная Карта</h2>
+                </div>
+
+                <div class="relative">
+                    <!-- Vertical Line -->
+                    <div class="absolute left-4 md:left-1/2 h-full w-0.5 bg-white/10 -translate-x-1/2"></div>
+
+                    <!-- Stage 1: Идея (Completed/Past) -->
+                    <div class="relative flex flex-col md:flex-row items-center justify-between mb-12 group">
+                        <div class="md:w-5/12 text-left md:text-right pl-12 md:pl-0 md:pr-10" data-aos="fade-right">
+                            <h4 class="text-xl font-bold text-white">Идея</h4>
+                            <p class="text-slate-400 text-sm mt-1">Анализ задачи, определение архитектуры, выбор моделей.</p>
+                        </div>
+                        <div class="absolute left-4 md:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-brand-accent shadow-[0_0_10px_rgba(20,184,166,0.8)] z-10"></div>
+                        <div class="md:w-5/12 pl-12 md:pl-10 hidden md:block">
+                            <span class="text-brand-accent font-mono text-sm">25–28 ноября</span>
+                        </div>
+                    </div>
+
+                    <!-- Stage 2: Прототип (Current) -->
+                    <div class="relative flex flex-col md:flex-row items-center justify-between mb-12 group">
+                        <div class="md:w-5/12 text-right pr-10 hidden md:block">
+                            <span class="text-brand-accent font-mono text-sm">29 ноября – 3 декабря (СЕЙЧАС)</span>
+                        </div>
+                        <!-- Active Indicator with Ping effect -->
+                        <div class="absolute left-4 md:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-brand-accent shadow-[0_0_10px_rgba(20,184,166,0.8)] z-10">
+                            <div class="absolute w-full h-full rounded-full bg-brand-accent animate-ping opacity-75"></div>
+                        </div>
+                        <div class="md:w-5/12 pl-12 md:pl-10 text-left" data-aos="fade-left">
+                            <h4 class="text-xl font-bold text-white">Прототип</h4>
+                            <p class="text-slate-400 text-sm mt-1">Демо-модуль: аудио → текст. Черновой интерфейс.</p>
+                        </div>
+                    </div>
+
+                    <!-- Stage 3: MVP (Future/Pending) -->
+                    <div class="relative flex flex-col md:flex-row items-center justify-between mb-12 group">
+                        <div class="md:w-5/12 text-left md:text-right pl-12 md:pl-0 md:pr-10 opacity-50" data-aos="fade-right">
+                            <h4 class="text-xl font-bold text-white">MVP</h4>
+                            <p class="text-slate-400 text-sm mt-1">Связка: звук → текст → жесты. Реальный рабочий функционал.</p>
+                        </div>
+                        <div class="absolute left-4 md:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-slate-700 border border-slate-500 z-10"></div>
+                        <div class="md:w-5/12 pl-12 md:pl-10 hidden md:block opacity-50">
+                            <span class="text-slate-500 font-mono text-sm">4–9 декабря</span>
+                        </div>
+                    </div>
+
+                    <!-- Stage 4: Публичный запуск (Future/Pending) -->
+                    <div class="relative flex flex-col md:flex-row items-center justify-between group">
+                        <div class="md:w-5/12 text-right pr-10 hidden md:block opacity-50">
+                            <span class="text-slate-500 font-mono text-sm">10–13 декабря</span>
+                        </div>
+                        <div class="absolute left-4 md:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-slate-700 border border-slate-500 z-10"></div>
+                        <div class="md:w-5/12 pl-12 md:pl-10 text-left opacity-50" data-aos="fade-left">
+                            <h4 class="text-xl font-bold text-white">Публичный запуск</h4>
+                            <p class="text-slate-400 text-sm mt-1">Финальный деплой, тестирование, подготовка к защите.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-10 border-t border-white/10 mt-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-500 text-sm">
+                &copy; 2025 DeafKIT. Powered by AI.
+            </div>
+        </footer>
+    </div>
+
+
+    <!-- AOS & Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Data structure for sections (Kept for Intersection Observer and link checking)
+        const SECTIONS = [
+            { id: 'problem', title: 'Миссия' },
+            { id: 'implementation', title: 'Технологии' },
+            { id: 'team', title: 'Команда' },
+            { id: 'roadmap', title: 'План' }
+        ];
+
+        // --- UI Updates and IntersectionObserver ---
+        
+        /**
+         * Updates the visual state of the navbar links based on the active section.
+         * @param {string} activeId - The ID of the currently active section.
+         */
+        function updateNavLinkUI(activeId) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('text-brand-accent', 'font-bold');
+            });
+            // Handle the link for Hero section by checking if it's the beginning of the page
+            const targetId = activeId === 'hero' ? '#problem' : `#${activeId}`;
+            const activeLink = document.querySelector(`a[href="${targetId}"]`);
+            if (activeLink) {
+                activeLink.classList.add('text-brand-accent', 'font-bold');
+            }
+        }
+
+        /**
+         * Setup Intersection Observer for scroll tracking to highlight navbar links.
+         */
+        function setupIntersectionObserver() {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                // Use 25% threshold to detect when the section enters/leaves view
+                threshold: 0.25 
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    // If a section is intersecting (visible), set it as active
+                    if (entry.isIntersecting) {
+                        const sectionId = entry.target.id;
+                        updateNavLinkUI(sectionId);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.section-scroll').forEach(section => {
+                observer.observe(section);
+            });
+            
+            // Also observe the Hero section to ensure the first link is active when scrolled to top
+            const heroElement = document.getElementById('hero');
+            if (heroElement) {
+                observer.observe(heroElement);
+            }
+        }
+
+
+        // --- Initialization and Event Listeners ---
+        window.onload = function() {
+            // 1. Initialize Animations
+            AOS.init({
+                once: true,
+                offset: 50,
+                duration: 800,
+            });
+
+            // 2. Setup Observers
+            setupIntersectionObserver();
+
+            // 3. Smooth scroll for all internal links (using native browser scroll behavior)
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+
+                    if (targetElement) {
+                        // Use native smooth scroll
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            // 4. Mobile Menu Toggle
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+
+            btn.addEventListener('click', () => {
+                menu.classList.toggle('hidden');
+            });
+
+            // 5. Navbar Scroll Effect
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('shadow-xl', 'bg-brand-dark/95', 'border-transparent');
+                    navbar.classList.remove('border-b', 'border-white/5');
+                } else {
+                    navbar.classList.remove('shadow-xl', 'bg-brand-dark/95', 'border-transparent');
+                    navbar.classList.add('border-b', 'border-white/5');
+                }
+            });
+            
+            // 6. Ensure initial state is correct (highlight Hero/first section link)
+            // This is handled by the Intersection Observer watching the Hero section.
+        };
+
+    </script>
+</body>
+</html>
